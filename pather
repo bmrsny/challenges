@@ -1,13 +1,15 @@
 #!/usr/bin/env ruby
 
 class Pather
-  attr_accessor :map
+  attr_accessor :map, :column_start, :path_end
   attr_reader :path_map, :markers, :find_char
 
   def initialize
-    @path_map  = ""
-    @find_char = "#"
-    @markers   = []
+    @path_map     = ""
+    @find_char    = "#"
+    @markers      = []
+    @path_end     = nil
+    @column_start = nil
     f =  File.open(ARGV[0], "r")
     f.each_line {|line| path_map << line}
     @map = path_map.split("\n").map(&:chars)
@@ -24,10 +26,7 @@ class Pather
       unless markers[index + 1] == nil
         if valid_row_path?(coordinates, index)
           set_row_connection(index)
-          row      = markers[index][0]
-          starting = markers[index][1]
-          ending   = markers[index + 1][1]
-          connect_row(row, starting, ending)
+          set_column_connection
         end
       end
     end
@@ -37,10 +36,37 @@ class Pather
     coordinates[0] == markers[index + 1][0]
   end
 
+  def set_column_connection
+    char_index = column_start[1]
+    current_row_index = column_start[0]
+    until current_row_index >= path_end[0]
+      current_row_index += 1
+      map[current_row_index][char_index] = "*"
+    end
+    #now set the final row over which direction? depends on whether or not greater char_index
+    finalize_row(current_row_index, char_index)
+  end
+
+  def finalize_row(row_index, char_index)
+    if char_index > path_end[1]
+      traverse_left(row_index, char_index)
+    else
+    end
+  end
+
+  def traverse_left(row_index, char_index)
+    count = char_index
+    until count == path_end[1]
+      count -= 1
+      map[row_index][count] = "*"
+    end
+  end
+
   def set_row_connection(index)
     row      = markers[index][0]
     starting = markers[index][1]
     ending   = markers[index + 1][1]
+    self.column_start = [row, ending]
     connect_row(row, starting, ending)
   end
 
@@ -58,6 +84,7 @@ class Pather
         row.each_with_index do |char, char_index|
           if char == find_char
             markers << [index, char_index]
+            self.path_end = markers.last
           end
         end
       end
