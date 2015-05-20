@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+
+class Pather
+  attr_accessor :map
+  attr_reader :path_map, :markers, :find_char
+
+  def initialize
+    @path_map  = ""
+    @find_char = "#"
+    @markers   = []
+    f =  File.open(ARGV[0], "r")
+    f.each_line {|line| path_map << line}
+    @map = path_map.split("\n").map(&:chars)
+    set_coordinates
+  end
+
+  def create_new_path
+    row_path
+  end
+
+  def row_path
+    markers.each_with_index do |coordinates, index|
+      if coordinates[0] == markers[index + 1][0]
+
+      end
+    end
+  end
+
+  def set_coordinates
+    map.each_with_index do |row, index|
+      if row.include?(find_char)
+        row.each_with_index do |char, char_index|
+          if char == find_char
+            markers << [index, char_index]
+          end
+        end
+      end
+    end
+  end
+end
+
+path = Pather.new
+path.create_new_path
