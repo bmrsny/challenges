@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 class Pather
-  attr_accessor :map, :column_start, :path_end
+  attr_accessor :map, :column_start, :path_end, :no_row_path
   attr_reader :path_map, :markers, :find_char
 
   def initialize
@@ -10,6 +10,7 @@ class Pather
     @markers      = []
     @path_end     = nil
     @column_start = nil
+    @no_row_path  = true
     f =  File.open(ARGV[0], "r")
     f.each_line {|line| path_map << line}
     @map = path_map.split("\n").map(&:chars)
@@ -25,7 +26,11 @@ class Pather
     markers.each_with_index do |coordinates, index|
       unless markers[index + 1] == nil
         if valid_row_path?(coordinates, index)
+          self.no_row_path = false
           set_row_connection(index)
+          set_column_connection
+        elsif valid_row_path?(coordinates, index) == false && no_row_path
+          set_column_path(index)
           set_column_connection
         end
       end
@@ -43,14 +48,18 @@ class Pather
       current_row_index += 1
       map[current_row_index][char_index] = "*"
     end
-    #now set the final row over which direction? depends on whether or not greater char_index
     finalize_row(current_row_index, char_index)
+  end
+
+  def set_column_path(index)
+    self.column_start = markers.first
   end
 
   def finalize_row(row_index, char_index)
     if char_index > path_end[1]
       traverse_left(row_index, char_index)
     else
+      traverse_right(row_index, char_index)
     end
   end
 
@@ -62,6 +71,14 @@ class Pather
     end
   end
 
+  def traverse_right(row_index, char_index)
+    count = char_index
+    until count == path_end[1]
+      count += 1
+      map[row_index][count] = "*"
+    end
+  end
+
   def set_row_connection(index)
     row      = markers[index][0]
     starting = markers[index][1]
@@ -69,6 +86,7 @@ class Pather
     self.column_start = [row, ending]
     connect_row(row, starting, ending)
   end
+
 
   def connect_row(row, starting, ending)
     counter = starting
