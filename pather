@@ -14,15 +14,41 @@ class Pather
     set_coordinates
   end
 
-  def create_new_path
-    row_path
+  def create_path
+    my_path
+    puts map.flat_map(&:join)
   end
 
-  def row_path
+  def my_path
     markers.each_with_index do |coordinates, index|
-      if coordinates[0] == markers[index + 1][0]
-
+      unless markers[index + 1] == nil
+        if valid_row_path?(coordinates, index)
+          set_row_connection(index)
+          row      = markers[index][0]
+          starting = markers[index][1]
+          ending   = markers[index + 1][1]
+          connect_row(row, starting, ending)
+        end
       end
+    end
+  end
+
+  def valid_row_path?(coordinates, index)
+    coordinates[0] == markers[index + 1][0]
+  end
+
+  def set_row_connection(index)
+    row      = markers[index][0]
+    starting = markers[index][1]
+    ending   = markers[index + 1][1]
+    connect_row(row, starting, ending)
+  end
+
+  def connect_row(row, starting, ending)
+    counter = starting
+    until counter == (ending -1)
+      counter += 1
+      map[row][counter] = "*"
     end
   end
 
@@ -40,4 +66,4 @@ class Pather
 end
 
 path = Pather.new
-path.create_new_path
+path.create_path
