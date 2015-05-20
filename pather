@@ -19,7 +19,11 @@ class Pather
 
   def create_path
     my_path
-    puts map.flat_map(&:join)
+    final_map = map.flat_map(&:join).join(&:"\n")
+
+    new_file = File.open(ARGV[1], "w")
+    new_file << final_map
+
   end
 
   def my_path
