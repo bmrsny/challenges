@@ -28,13 +28,17 @@ class Pather
   def my_path
     markers.each_with_index do |coordinates, index|
       unless markers[index + 1] == nil
-        if valid_row_path?(coordinates, index)
-          check_for_columns(index)
-        elsif valid_row_path?(coordinates, index) == false && no_row_path
-          set_column_path(index)
-          set_column_connection
-        end
+        set_new_path(coordinates, index)
       end
+    end
+  end
+
+  def set_new_path(coordinates, index)
+    if valid_row_path?(coordinates, index)
+      check_for_columns(index)
+    elsif valid_row_path?(coordinates, index) == false && no_row_path
+      set_column_path(index)
+      set_column_connection
     end
   end
 
