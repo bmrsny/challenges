@@ -19,7 +19,7 @@ class Pather
 
   def create_path
     my_path
-    final_map = map.flat_map(&:join).join("\n")
+    final_map = map.flat_map(&:join).join("\n") + "\n"
 
     new_file = File.open(ARGV[1], "w")
     new_file << final_map
@@ -29,9 +29,14 @@ class Pather
     markers.each_with_index do |coordinates, index|
       unless markers[index + 1] == nil
         if valid_row_path?(coordinates, index)
-          self.no_row_path = false
-          set_row_connection(index)
-          set_column_connection
+          if markers.count == 2
+            self.no_row_path = false
+            set_row_connection(index)
+          else
+            self.no_row_path = false
+            set_row_connection(index)
+            set_column_connection
+          end
         elsif valid_row_path?(coordinates, index) == false && no_row_path
           set_column_path(index)
           set_column_connection
@@ -67,18 +72,18 @@ class Pather
   end
 
   def traverse_left(row_index, char_index)
-    count = char_index
-    until count == path_end[1]
-      count -= 1
-      map[row_index][count] = "*"
+    current_index = char_index
+    until current_index == (path_end[1] + 1)
+      current_index -= 1
+      map[row_index][current_index] = "*"
     end
   end
 
   def traverse_right(row_index, char_index)
-    count = char_index
-    until count == path_end[1]
-      count += 1
-      map[row_index][count] = "*"
+    current_index = char_index
+    until current_index == (path_end[1] - 1)
+      current_index += 1
+      map[row_index][current_index] = "*"
     end
   end
 
