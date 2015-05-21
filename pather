@@ -20,7 +20,6 @@ class Pather
   def create_path
     my_path
     final_map = map.flat_map(&:join).join("\n") + "\n"
-
     new_file = File.open(ARGV[1], "w")
     new_file << final_map
   end
@@ -36,7 +35,7 @@ class Pather
   def set_new_path(coordinates, index)
     if valid_row_path?(coordinates, index)
       check_for_columns(index)
-    elsif valid_row_path?(coordinates, index) == false && no_row_path
+    elsif no_row_path
       set_column_path(index)
       set_column_connection
     end
@@ -51,7 +50,6 @@ class Pather
       set_row_connection(index)
       set_column_connection
     end
-
   end
 
   def valid_row_path?(coordinates, index)
@@ -116,12 +114,16 @@ class Pather
   def set_coordinates
     map.each_with_index do |row, index|
       if row.include?(find_char)
-        row.each_with_index do |char, char_index|
-          if char == find_char
-            markers << [index, char_index]
-            self.path_end = markers.last
-          end
-        end
+        add_matches(row, index)
+      end
+    end
+  end
+
+  def add_matches(row, index)
+    row.each_with_index do |char, char_index|
+      if char == find_char
+        markers << [index, char_index]
+        self.path_end = markers.last
       end
     end
   end
