@@ -5,41 +5,94 @@ class Pather
   attr_reader :path_map, :markers, :find_char
 
   def initialize
-    @path_map     = ""
     @find_char    = "#"
     @markers      = []
     @path_end     = nil
     @column_start = nil
     @no_row_path  = true
-    f =  File.open(ARGV[0], "r")
-    f.each_line {|line| path_map << line}
-    @map = path_map.split("\n").map(&:chars)
-    set_coordinates
   end
 
   def create_path
-    my_path
+    read_map
+
+    set_coordinates
+
+    generate_path
+
+    output_map
+  end
+
+  def read_map
+    @path_map     = ""
+    f =  File.open(ARGV[0], "r")
+    f.each_line {|line| path_map << line}
+    @map = path_map.split("\n").map(&:chars)
+  end
+
+  def generate_path
+    markers.each_with_index do |_, index|
+      @index  = index
+      draw_path unless next_marker == nil
+    end
+  end
+
+  def output_map
     final_map = map.flat_map(&:join).join("\n") + "\n"
     new_file = File.open(ARGV[1], "w")
     new_file << final_map
   end
 
-  def my_path
-    markers.each_with_index do |coordinates, index|
-      unless markers[index + 1] == nil
-        set_new_path(coordinates, index)
-      end
+  def draw_path
+    case
+    when valid_row? then set_row_connection(current_marker, next_marker)
     end
   end
 
-  def set_new_path(coordinates, index)
-    if valid_row_path?(coordinates, index)
-      check_for_columns(index)
-    elsif no_row_path
-      set_column_path(index)
-      set_column_connection
+  def valid_row?
+    current_row == next_row
+  end
+
+  def current_marker
+    markers[@index]
+  end
+
+  def next_marker
+    markers[@index + 1]
+  end
+
+  def current_row
+    current_marker[0]
+  end
+
+  def next_row
+    next_marker[0]
+  end
+
+  def set_row_connection(current_marker, next_marker)
+    current_index = current_marker[1]
+    until current_index == (next_marker[1] -1)
+      current_index += 1
+      map[current_row][current_index] = "*"
     end
   end
+  #
+  #def set_row_connection(row, index) #?
+  #row      = markers[index][0]
+  #starting = markers[index][1]
+  #ending   = markers[index + 1][1]
+  #self.column_start = [row, ending]
+  #connect_row(row, starting, ending)
+  #end
+
+
+  #def draw_path(coordinates, index)
+  #if valid_row_path?(coordinates, index)
+  #check_for_columns(index)
+  #elsif no_row_path
+  #set_column_path(index)
+  #set_column_connection
+  #end
+  #end
 
   def check_for_columns(index)
     if markers.count == 2
@@ -52,9 +105,6 @@ class Pather
     end
   end
 
-  def valid_row_path?(coordinates, index)
-    coordinates[0] == markers[index + 1][0]
-  end
 
   def set_column_connection
     char_index = column_start[1]
@@ -94,32 +144,22 @@ class Pather
     end
   end
 
-  def set_row_connection(index)
-    row      = markers[index][0]
-    starting = markers[index][1]
-    ending   = markers[index + 1][1]
-    self.column_start = [row, ending]
-    connect_row(row, starting, ending)
-  end
-
 
   def connect_row(row, starting, ending)
-    counter = starting
-    until counter == (ending -1)
-      counter += 1
-      map[row][counter] = "*"
+    current_index = starting
+    until current_index == (ending -1)
+      current_index += 1
+      map[row][current_index] = "*"
     end
   end
 
   def set_coordinates
     map.each_with_index do |row, index|
-      if row.include?(find_char)
-        add_matches(row, index)
-      end
+      add_markers(row, index) if row.include?(find_char)
     end
   end
 
-  def add_matches(row, index)
+  def add_markers(row, index)
     row.each_with_index do |char, char_index|
       if char == find_char
         markers << [index, char_index]
