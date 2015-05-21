@@ -29,20 +29,25 @@ class Pather
     markers.each_with_index do |coordinates, index|
       unless markers[index + 1] == nil
         if valid_row_path?(coordinates, index)
-          if markers.count == 2
-            self.no_row_path = false
-            set_row_connection(index)
-          else
-            self.no_row_path = false
-            set_row_connection(index)
-            set_column_connection
-          end
+          check_for_columns(index)
         elsif valid_row_path?(coordinates, index) == false && no_row_path
           set_column_path(index)
           set_column_connection
         end
       end
     end
+  end
+
+  def check_for_columns(index)
+    if markers.count == 2
+      self.no_row_path = false
+      set_row_connection(index)
+    else
+      self.no_row_path = false
+      set_row_connection(index)
+      set_column_connection
+    end
+
   end
 
   def valid_row_path?(coordinates, index)
