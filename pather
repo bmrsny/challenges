@@ -115,11 +115,9 @@ class Pather
 
   def set_midpoint_marker
     if current_marker[1] >= next_marker[1]
-      #difference = current_marker[1] - next_marker[1]
       diff = difference(current_marker[1], next_marker[1])
       @midpoint  = [next_row, next_marker[1] + diff]
     else
-      #difference = next_marker[1] - current_marker[1]
       diff = difference(next_marker[1], current_marker[1])
       @midpoint  = [next_row, next_marker[1] - diff]
     end
