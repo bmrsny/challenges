@@ -2,7 +2,7 @@
 
 class Pather
   attr_accessor :map
-  attr_reader   :markers_char
+  attr_reader   :markers
 
   FIND_CHAR = "#"
 
