@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 class Pather
-  attr_accessor :map, :column_start, :path_end, :no_row_path
+  attr_accessor :map, :column_start, :path_end, :no_row_path, :current_marker, :next_marker
   attr_reader :path_map, :markers, :find_char
 
   def initialize
@@ -9,7 +9,6 @@ class Pather
     @markers      = []
     @path_end     = nil
     @column_start = nil
-    @no_row_path  = true
   end
 
   def create_path
@@ -44,13 +43,16 @@ class Pather
 
   def draw_path
     case
-    when valid_row? then set_row_connection(current_marker, next_marker)
+    when valid_row?
+      set_row_connection(current_marker, next_marker)
+      #when valid_column? then set_column_connection(current_marker, next_marker)
+      #when valid_column?
+      #set_connection(current_marker, next_marker)
+    else
+      set_connection(current_marker, next_marker)
     end
   end
 
-  def valid_row?
-    current_row == next_row
-  end
 
   def current_marker
     markers[@index]
@@ -68,14 +70,80 @@ class Pather
     next_marker[0]
   end
 
-  def set_row_connection(current_marker, next_marker)
-    current_index = current_marker[1]
-    until current_index == (next_marker[1] -1)
+  def valid_row?
+    current_row == next_row
+  end
+
+  def valid_midpoint_row?
+    next_row == @midpoint[0]
+  end
+
+  def valid_midpoint_column?
+    current_marker[1] == @midpoint[1]
+  end
+
+  def set_row_connection(start, finish)
+    current_index = start[1]
+    until current_index == (finish[1] - 1)
       current_index += 1
-      map[current_row][current_index] = "*"
+      map[start[0]][current_index] = "*"
     end
   end
-  #
+
+  def valid_column?
+    #create a midpoint and check for the indexes
+    current_marker[1] == @midpoint[1]
+  end
+
+  def set_column_connection(current_marker, next_marker)
+    current_index     = current_marker[1]
+    current_row_index = current_row
+    until current_row_index == next_row
+      current_row_index += 1
+      map[current_row_index][current_index] = "*"
+    end
+  end
+
+  def set_connection(current_marker, next_marker)
+    set_midpoint_marker
+    set_column_connection(current_marker, next_marker)
+    left_or_right
+  end
+
+  def left_or_right
+    if next_marker[1] > @midpoint[1]
+      set_row_connection(@midpoint, next_marker)
+    else
+      set_row_connection(next_marker, @midpoint)
+    end
+  end
+
+  def set_midpoint_marker
+    if current_marker[1] > next_marker[1]
+      difference = current_marker[1] - next_marker[1]
+      @midpoint  = [next_row, next_marker[1] + difference]
+    elsif current_marker[1] < next_marker[1]
+      difference = next_marker[1] - current_marker[1]
+      @midpoint  = [next_row, next_marker[1] - difference]
+    else #equal?
+    end
+  end
+
+  def set_coordinates
+    map.each_with_index do |row, index|
+      add_markers(row, index) if row.include?(find_char)
+    end
+  end
+
+  def add_markers(row, index)
+    row.each_with_index do |char, char_index|
+      if char == find_char
+        markers << [index, char_index]
+        self.path_end = markers.last
+      end
+    end
+  end
+
   #def set_row_connection(row, index) #?
   #row      = markers[index][0]
   #starting = markers[index][1]
@@ -94,79 +162,65 @@ class Pather
   #end
   #end
 
-  def check_for_columns(index)
-    if markers.count == 2
-      self.no_row_path = false
-      set_row_connection(index)
-    else
-      self.no_row_path = false
-      set_row_connection(index)
-      set_column_connection
-    end
-  end
+  #def check_for_columns(index)
+  #if markers.count == 2
+  #self.no_row_path = false
+  #set_row_connection(index)
+  #else
+  #self.no_row_path = false
+  #set_row_connection(index)
+  #set_column_connection
+  #end
+  #end
 
 
-  def set_column_connection
-    char_index = column_start[1]
-    current_row_index = column_start[0]
-    until current_row_index >= path_end[0]
-      current_row_index += 1
-      map[current_row_index][char_index] = "*"
-    end
-    finalize_row(current_row_index, char_index)
-  end
+  #def set_column_connection
+  #char_index = column_start[1]
+  #current_row_index = column_start[0]
+  #until current_row_index >= path_end[0]
+  #current_row_index += 1
+  #map[current_row_index][char_index] = "*"
+  #end
+  #finalize_row(current_row_index, char_index)
+  #end
 
-  def set_column_path(index)
-    self.column_start = markers.first
-  end
+  #def set_column_path(index)
+  #self.column_start = markers.first
+  #end
 
-  def finalize_row(row_index, char_index)
-    if char_index > path_end[1]
-      traverse_left(row_index, char_index)
-    else
-      traverse_right(row_index, char_index)
-    end
-  end
+  #def finalize_row(row_index, char_index)
+  #if char_index > path_end[1]
+  #traverse_left(row_index, char_index)
+  #else
+  #traverse_right(row_index, char_index)
+  #end
+  #end
 
-  def traverse_left(row_index, char_index)
-    current_index = char_index
-    until current_index == (path_end[1] + 1)
-      current_index -= 1
-      map[row_index][current_index] = "*"
-    end
-  end
+  #def traverse_left(row_index, char_index)
+  #current_index = char_index
+  #until current_index == (path_end[1] + 1)
+  #current_index -= 1
+  #map[row_index][current_index] = "*"
+  #end
+  #end
 
-  def traverse_right(row_index, char_index)
-    current_index = char_index
-    until current_index == (path_end[1] - 1)
-      current_index += 1
-      map[row_index][current_index] = "*"
-    end
-  end
+  #def traverse_right(row_index, char_index)
+  #current_index = char_index
+  #until current_index == (path_end[1] - 1)
+  #current_index += 1
+  #map[row_index][current_index] = "*"
+  #end
+  #end
 
 
-  def connect_row(row, starting, ending)
-    current_index = starting
-    until current_index == (ending -1)
-      current_index += 1
-      map[row][current_index] = "*"
-    end
-  end
+  #def connect_row(row, starting, ending)
+  #current_index = starting
+  #until current_index == (ending -1)
+  #current_index += 1
+  #map[row][current_index] = "*"
+  #end
+  #end
 
-  def set_coordinates
-    map.each_with_index do |row, index|
-      add_markers(row, index) if row.include?(find_char)
-    end
-  end
-
-  def add_markers(row, index)
-    row.each_with_index do |char, char_index|
-      if char == find_char
-        markers << [index, char_index]
-        self.path_end = markers.last
-      end
-    end
-  end
 end
 
 path = Pather.new
