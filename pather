@@ -2,7 +2,7 @@
 
 class Pather
   attr_accessor :map
-  attr_reader :path_map, :markers, :find_char
+  attr_reader   :markers, :find_char
 
   def initialize
     @find_char    = "#"
@@ -20,7 +20,7 @@ class Pather
   end
 
   def read_map
-    @path_map     = ""
+    path_map     = ""
     f =  File.open(ARGV[0], "r")
     f.each_line {|line| path_map << line}
     @map = path_map.split("\n").map(&:chars)
