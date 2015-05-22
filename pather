@@ -2,10 +2,11 @@
 
 class Pather
   attr_accessor :map
-  attr_reader   :markers, :find_char
+  attr_reader   :markers
+
+  FIND_CHAR = "#"
 
   def initialize
-    @find_char    = "#"
     @markers      = []
   end
 
@@ -127,13 +128,13 @@ class Pather
 
   def set_coordinates
     map.each_with_index do |row, index|
-      add_markers(row, index) if row.include?(find_char)
+      add_markers(row, index) if row.include?(FIND_CHAR)
     end
   end
 
   def add_markers(row, index)
     row.each_with_index do |char, char_index|
-      markers << [index, char_index] if char == find_char
+      markers << [index, char_index] if char == FIND_CHAR
     end
   end
 end
