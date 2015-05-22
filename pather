@@ -2,7 +2,7 @@
 
 class Pather
   attr_accessor :map
-  attr_reader   :markers
+  attr_reader   :markers_char
 
   FIND_CHAR = "#"
 
@@ -44,9 +44,6 @@ class Pather
     case
     when valid_row?
       set_row_connection(current_marker, next_marker)
-      #when valid_column? then set_column_connection(current_marker, next_marker)
-      #when valid_column?
-      #set_connection(current_marker, next_marker)
     else
       set_connection(current_marker, next_marker)
     end
